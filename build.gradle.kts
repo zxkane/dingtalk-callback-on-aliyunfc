@@ -2,6 +2,7 @@ import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 import org.gradle.api.tasks.testing.logging.TestLogEvent
 import org.gradle.util.GFileUtils
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 
 val detektVersion = "1.0.0-RC11"
 val kotlinTestVersion = "3.1.10"
@@ -13,6 +14,7 @@ plugins {
     id("org.jetbrains.kotlin.jvm") version kotlinVersion
     id("org.jetbrains.kotlin.plugin.spring") version kotlinVersion
     id("io.gitlab.arturbosch.detekt") version detektVersion
+    id("com.github.johnrengelman.shadow") version "4.0.3"
 }
 
 group = "com.github.zxkane"
@@ -56,10 +58,7 @@ repositories {
 
 dependencies {
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
-    implementation("org.jetbrains.kotlin:kotlin-reflect")
-    implementation("org.jetbrains.kotlin:kotlin-script-runtime")
-    implementation("org.jetbrains.kotlin:kotlin-compiler-embeddable")
-    implementation("org.jetbrains.kotlin:kotlin-script-util")
+    implementation("com.aliyun.fc.runtime:fc-java-core:1.2.0")
 
     detektPlugins("io.gitlab.arturbosch.detekt:detekt-formatting:${detektVersion}")
 }
@@ -100,4 +99,9 @@ detekt {
         report = "project.projectDir/reports"
         mask = "*.kt"
     }
+}
+
+tasks.withType<ShadowJar> {
+    baseName = "${project.name}-all"
+    version = "$version"
 }
