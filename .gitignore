@@ -1,0 +1,14 @@
+/bin/
+/out/
+.gradle/
+build/
+.classpath
+.project
+.java-version
+src/main/resources/static/*
+src/main/resources/rebel.xml
+.gradletasknamecache
+rebel.xml
+.idea/
+.setting/
+LOG_PATH_IS_UNDEFINED
