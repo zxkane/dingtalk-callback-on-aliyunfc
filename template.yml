@@ -1,0 +1,29 @@
+ROSTemplateFormatVersion: '2015-09-01'
+Transform: 'Aliyun::Serverless-2018-04-03'
+Resources:
+  dingtalk-approval: # service name
+    Type: 'Aliyun::Serverless::Service'
+    Properties:
+      Description: 'The callback of DingTalk Approvals'
+      LogConfig:
+        Project: dingtalk-approvals
+        Logstore: fc-dingtalk
+    helloworld: # function name
+      Type: 'Aliyun::Serverless::Function'
+      Properties:
+        Handler: com.github.zxkane.dingtalk.Approval::handleRequest
+        Runtime: java8
+        Description: 'Hello world!'
+        MemorySize: 128
+        Timeout: 10
+        CodeUri: './build/libs/dingtalk-approvals-all-1.0.0-SNAPSHOT-all.jar'
+  dingtalk_approval_gateway: # Api Group
+    Type: 'Aliyun::Serverless::Api'
+    Properties:
+      StageName: RELEASE,PRE
+      DefinitionBody:
+        '/hello':
+          get:
+            x-aliyun-apigateway-api-name: helloworld
+            x-aliyun-apigateway-fc:
+              arn: acs:fc:::services/${dingtalk-approval.Arn}/functions/${helloworld.Arn}/

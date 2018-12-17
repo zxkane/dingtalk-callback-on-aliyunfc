@@ -60,6 +60,8 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
     implementation("com.aliyun.fc.runtime:fc-java-core:1.2.0")
 
+    implementation("com.google.code.gson:gson:2.8.5")
+
     detektPlugins("io.gitlab.arturbosch.detekt:detekt-formatting:${detektVersion}")
 }
 
