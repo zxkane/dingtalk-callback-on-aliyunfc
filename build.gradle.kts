@@ -5,8 +5,9 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 
 val detektVersion = "1.0.0-RC11"
-val kotlinTestVersion = "3.1.10"
+val kotlinTestVersion = "3.1.11"
 val junit5Version = "5.3.2"
+val jacksonVersion = "2.9.7"
 
 plugins {
     val kotlinVersion = "1.3.10"
@@ -60,7 +61,12 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
     implementation("com.aliyun.fc.runtime:fc-java-core:1.2.0")
 
-    implementation("com.fasterxml.jackson.core:jackson-databind:2.9.7")
+    implementation("com.fasterxml.jackson.core:jackson-databind:${jacksonVersion}")
+    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:${jacksonVersion}")
+    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:${jacksonVersion}")
+
+    implementation("commons-codec:commons-codec:1.11")
+    compile(files("lib/lippi-oapi-encrpt.jar"))
 
     testImplementation("org.junit.jupiter:junit-jupiter-api:${junit5Version}")
     testRuntime("org.junit.jupiter:junit-jupiter-engine:${junit5Version}")
@@ -110,4 +116,8 @@ detekt {
 tasks.withType<ShadowJar> {
     baseName = "${project.name}-all"
     version = "${version}"
+}
+
+tasks.getByName("build") {
+    finalizedBy("shadowJar")
 }

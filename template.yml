@@ -8,24 +8,39 @@ Resources:
       LogConfig:
         Project: dingtalk-callback
         Logstore: fc-log
-    approvals: # function name
+    callback: # function name
       Type: 'Aliyun::Serverless::Function'
       Properties:
-        Handler: com.github.zxkane.dingtalk.Approval::handleRequest
+        Initializer: com.github.zxkane.dingtalk.Callback::initialize
+        Handler: com.github.zxkane.dingtalk.Callback::handleRequest
         Runtime: java8
-        Description: 'Approvals callback'
+        Description: 'Dingtalk callbacks'
         MemorySize: 128
         Timeout: 10
         CodeUri: './build/libs/dingtalk-callback-all-1.0.0-SNAPSHOT-all.jar'
   dingtalk_callback_gateway: # Api Group
     Type: 'Aliyun::Serverless::Api'
     Properties:
-      StageName: RELEASE,PRE
+      StageName: RELEASE
       DefinitionBody:
-        '/dingtalk/approvals':
-          get:
-            x-aliyun-apigateway-api-name: approvals
+        '/dingtalk':
+          post:
+            x-aliyun-apigateway-api-name: callback
+            x-aliyun-apigateway-request-config:
+              requestProtocol: "HTTP"
+              requestMode: "MAPPING"
+              bodyFormat: "STREAM"
+            x-aliyun-apigateway-request-parameters:
+              - apiParameterName: 'timestamp'
+                location: 'Query'
+                parameterType: 'String'
+                required: 'REQUIRED'
+              - apiParameterName: 'nonce'
+                location: 'Query'
+                parameterType: 'String'
+              - apiParameterName: 'signature'
+                location: 'Query'
+                parameterType: 'String'
             x-aliyun-apigateway-fc:
-              arn: acs:fc:::services/${dingtalk-callback.Arn}/functions/${approvals.Arn}/
-            x-aliyun-apigateway-service-config:
-              service-timeout: 11000
+              arn: acs:fc:::services/${dingtalk-callback.Arn}/functions/${callback.Arn}/
+              timeout: 11000
