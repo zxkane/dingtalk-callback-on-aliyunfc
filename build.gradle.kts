@@ -6,13 +6,13 @@ import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 
 val detektVersion = "1.0.0-RC11"
 val kotlinTestVersion = "3.1.10"
+val junit5Version = "5.3.2"
 
 plugins {
     val kotlinVersion = "1.3.10"
     val detektVersion = "1.0.0-RC11"
 
     id("org.jetbrains.kotlin.jvm") version kotlinVersion
-    id("org.jetbrains.kotlin.plugin.spring") version kotlinVersion
     id("io.gitlab.arturbosch.detekt") version detektVersion
     id("com.github.johnrengelman.shadow") version "4.0.3"
 }
@@ -60,7 +60,11 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
     implementation("com.aliyun.fc.runtime:fc-java-core:1.2.0")
 
-    implementation("com.google.code.gson:gson:2.8.5")
+    implementation("com.fasterxml.jackson.core:jackson-databind:2.9.7")
+
+    testImplementation("org.junit.jupiter:junit-jupiter-api:${junit5Version}")
+    testRuntime("org.junit.jupiter:junit-jupiter-engine:${junit5Version}")
+    testCompile("io.kotlintest:kotlintest-runner-junit5:${kotlinTestVersion}")
 
     detektPlugins("io.gitlab.arturbosch.detekt:detekt-formatting:${detektVersion}")
 }
@@ -105,5 +109,5 @@ detekt {
 
 tasks.withType<ShadowJar> {
     baseName = "${project.name}-all"
-    version = "$version"
+    version = "${version}"
 }
