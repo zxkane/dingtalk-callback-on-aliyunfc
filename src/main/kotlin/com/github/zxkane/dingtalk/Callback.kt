@@ -47,17 +47,22 @@ class Callback : PojoRequestHandler<APIRequest, APIResponse>, FunctionInitialize
 
         logger.debug("Event json is $eventJson.")
 
-        val bpmEvent = objectMapper.readValue<BPMEvent>(eventJson, BPMEvent::class.java)
+        val event = objectMapper.readValue<Event>(eventJson, Event::class.java)
 
-        when (bpmEvent.eventType) {
+        when (event.type) {
             "check_url" -> {
                 logger.debug("Received callback validation request.")
             }
-            "bpms_instance_change" -> {
-                logger.debug("BPM $bpmEvent is started or finished.")
+            "bpms_instance_change", "bpms_task_change" -> {
+                logger.debug("BPM $event is received.")
             }
-            "bpms_task_change" -> {
-                logger.debug("BPM $bpmEvent is changed.")
+            "user_add_org", "user_modify_org", "user_leave_org", "org_admin_add",
+                "org_admin_remove", "org_dept_create", "org_dept_modify", "org_dept_remove",
+                "org_change" -> {
+                logger.debug("Org event $event is received.")
+            }
+            else -> {
+                logger.debug("Unrecognized event $event is received.")
             }
         }
 
@@ -67,6 +72,6 @@ class Callback : PojoRequestHandler<APIRequest, APIResponse>, FunctionInitialize
         logger.debug("Callback response is $response.")
 
         return APIResponse(Base64.encodeBase64String(objectMapper.writeValueAsString(response).toByteArray()),
-            mapOf("content-type" to "application/json"), true, 200)
+            mapOf("content-eventType" to "application/json"), true, 200)
     }
 }

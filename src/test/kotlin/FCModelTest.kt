@@ -18,7 +18,7 @@ class FCModelTests : StringSpec() {
         "can deserialize API Request" {
             forall(
                     row("{ \"path\":\"api request path\", \"httpMethod\":\"request method name\", \"headers\":{}, \"queryParameters\":{}, \"pathParameters\":{}, \"body\":\"string of request payload\", \"isBase64Encoded\":true }"),
-                    row("{ \"path\":\"api request path\", \"httpMethod\":\"request method name\", \"headers\":{}, \"queryParameters\":{}, \"pathParameters\":{}, \"body\":\"{ \\\"EventType\\\" : \\\"check_url\\\" }\", \"isBase64Encoded\":true }")
+                    row("{ \"path\":\"api request path\", \"httpMethod\":\"request method name\", \"headers\":{}, \"queryParameters\":{}, \"pathParameters\":{}, \"body\":\"{ \\\"eventType\\\" : \\\"check_url\\\" }\", \"isBase64Encoded\":true }")
             ) {
                 requestJson ->
                 val request = objectMapper.readValue<APIRequestKt>(requestJson, APIRequestKt::class.java)
@@ -29,7 +29,7 @@ class FCModelTests : StringSpec() {
         }
 
         "deserialize from inpustream" {
-            val stream = ByteArrayInputStream("{ \"path\":\"api request path\", \"httpMethod\":\"request method name\", \"headers\":{\"content-type\":\"application/json\"}, \"queryParameters\":{}, \"pathParameters\":{}, \"body\":\"xxx\", \"isBase64Encoded\":false }".toByteArray())
+            val stream = ByteArrayInputStream("{ \"path\":\"api request path\", \"httpMethod\":\"request method name\", \"headers\":{\"content-eventType\":\"application/json\"}, \"queryParameters\":{}, \"pathParameters\":{}, \"body\":\"xxx\", \"isBase64Encoded\":false }".toByteArray())
             val request = objectMapper.readValue<APIRequestKt>(stream, APIRequestKt::class.java)
                 request.isBase64Encoded shouldBe false
                 request.path shouldBe "api request path"

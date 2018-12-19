@@ -2,31 +2,61 @@ package com.github.zxkane.dingtalk
 
 import com.fasterxml.jackson.annotation.JsonFormat
 import com.fasterxml.jackson.annotation.JsonProperty
+import com.fasterxml.jackson.annotation.JsonSubTypes
+import com.fasterxml.jackson.annotation.JsonTypeInfo
 import java.time.ZonedDateTime
 
 data class EncryptedEvent(
     @JsonProperty(required = true) val encrypt: String
 )
 
-open class Event(val eventType: String)
-
-data class BPMEvent(
-    @JsonProperty("EventType", required = true) val type: String,
-    @JsonProperty("processInstanceId") val instanceId: String?,
-    @JsonProperty("corpId") val corpId: String?,
-    @JsonFormat(shape = JsonFormat.Shape.NUMBER)
-    @JsonProperty("createTime") val createdTime: ZonedDateTime?,
-    @JsonFormat(shape = JsonFormat.Shape.NUMBER)
-    @JsonProperty("finishTime") val finishTime: ZonedDateTime?,
-    @JsonProperty("bizCategoryId") val categoryId: String?,
-    @JsonProperty("title") val title: String?,
-    @JsonProperty("staffId") val staff: String?,
-    @JsonProperty("result") val result: String?,
-    @JsonProperty("remark") val remark: String?,
-    @JsonProperty("url") val url: String?
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "EventType", visible = true)
+@JsonSubTypes(
+    *[
+        JsonSubTypes.Type(value = Event.CheckEvent::class, name = "check_url"),
+        JsonSubTypes.Type(value = Event.OrgEvent::class, name = "user_add_org"),
+        JsonSubTypes.Type(value = Event.OrgEvent::class, name = "user_modify_org"),
+        JsonSubTypes.Type(value = Event.OrgEvent::class, name = "user_leave_org"),
+        JsonSubTypes.Type(value = Event.OrgEvent::class, name = "org_admin_add"),
+        JsonSubTypes.Type(value = Event.OrgEvent::class, name = "org_admin_remove"),
+        JsonSubTypes.Type(value = Event.OrgEvent::class, name = "org_dept_create"),
+        JsonSubTypes.Type(value = Event.OrgEvent::class, name = "org_dept_modify"),
+        JsonSubTypes.Type(value = Event.OrgEvent::class, name = "org_dept_remove"),
+        JsonSubTypes.Type(value = Event.OrgEvent::class, name = "org_change"),
+        JsonSubTypes.Type(value = Event.BPMEvent::class, name = "bpms_task_change"),
+        JsonSubTypes.Type(value = Event.BPMEvent::class, name = "bpms_instance_change")
+    ]
 )
-    : Event(type) {
+sealed class Event(val type: String) {
 
-    constructor(type: String) : this(type, null, null, null, null,
-        null, null, null, null, null, null)
+    data class CheckEvent(@JsonProperty("EventType", required = true) val eventType: String) : Event(eventType)
+
+    data class OrgEvent(
+        @JsonProperty("EventType", required = true)
+        val eventType: String,
+        @JsonFormat(shape = JsonFormat.Shape.NUMBER)
+        val TimeStamp: ZonedDateTime,
+        val UserId: List<String>?,
+        val DeptId: List<String>?,
+        val CorpID: String?
+    ) : Event(eventType)
+
+    data class BPMEvent(
+        @JsonProperty("EventType", required = true)
+        val eventType: String,
+        val processInstanceId: String,
+        val corpId: String,
+        @JsonFormat(shape = JsonFormat.Shape.NUMBER)
+        val createTime: ZonedDateTime,
+        @JsonFormat(shape = JsonFormat.Shape.NUMBER)
+        val finishTime: ZonedDateTime?,
+        val bizCategoryId: String,
+        val title: String,
+        @JsonProperty("type", required = true)
+        val bpmType: String,
+        val staffId: String,
+        val result: String?,
+        val remark: String?,
+        val url: String?
+    ) : Event(eventType)
 }

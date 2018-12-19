@@ -59,6 +59,7 @@ repositories {
 
 dependencies {
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
+    implementation("org.jetbrains.kotlin:kotlin-reflect")
     implementation("com.aliyun.fc.runtime:fc-java-core:1.2.0")
 
     implementation("com.fasterxml.jackson.core:jackson-databind:${jacksonVersion}")
@@ -70,7 +71,9 @@ dependencies {
 
     testImplementation("org.junit.jupiter:junit-jupiter-api:${junit5Version}")
     testRuntime("org.junit.jupiter:junit-jupiter-engine:${junit5Version}")
-    testCompile("io.kotlintest:kotlintest-runner-junit5:${kotlinTestVersion}")
+    testCompile("io.kotlintest:kotlintest-runner-junit5:${kotlinTestVersion}") {
+        exclude("org.jetbrains.kotlin")
+    }
 
     detektPlugins("io.gitlab.arturbosch.detekt:detekt-formatting:${detektVersion}")
 }
