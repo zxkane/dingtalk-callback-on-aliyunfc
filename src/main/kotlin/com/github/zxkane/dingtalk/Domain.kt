@@ -12,20 +12,18 @@ data class EncryptedEvent(
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "EventType", visible = true)
 @JsonSubTypes(
-    *[
-        JsonSubTypes.Type(value = Event.CheckEvent::class, name = "check_url"),
-        JsonSubTypes.Type(value = Event.OrgEvent::class, name = "user_add_org"),
-        JsonSubTypes.Type(value = Event.OrgEvent::class, name = "user_modify_org"),
-        JsonSubTypes.Type(value = Event.OrgEvent::class, name = "user_leave_org"),
-        JsonSubTypes.Type(value = Event.OrgEvent::class, name = "org_admin_add"),
-        JsonSubTypes.Type(value = Event.OrgEvent::class, name = "org_admin_remove"),
-        JsonSubTypes.Type(value = Event.OrgEvent::class, name = "org_dept_create"),
-        JsonSubTypes.Type(value = Event.OrgEvent::class, name = "org_dept_modify"),
-        JsonSubTypes.Type(value = Event.OrgEvent::class, name = "org_dept_remove"),
-        JsonSubTypes.Type(value = Event.OrgEvent::class, name = "org_change"),
-        JsonSubTypes.Type(value = Event.BPMEvent::class, name = "bpms_task_change"),
-        JsonSubTypes.Type(value = Event.BPMEvent::class, name = "bpms_instance_change")
-    ]
+    JsonSubTypes.Type(value = Event.CheckEvent::class, name = "check_url"),
+    JsonSubTypes.Type(value = Event.OrgEvent::class, name = "user_add_org"),
+    JsonSubTypes.Type(value = Event.OrgEvent::class, name = "user_modify_org"),
+    JsonSubTypes.Type(value = Event.OrgEvent::class, name = "user_leave_org"),
+    JsonSubTypes.Type(value = Event.OrgEvent::class, name = "org_admin_add"),
+    JsonSubTypes.Type(value = Event.OrgEvent::class, name = "org_admin_remove"),
+    JsonSubTypes.Type(value = Event.OrgEvent::class, name = "org_dept_create"),
+    JsonSubTypes.Type(value = Event.OrgEvent::class, name = "org_dept_modify"),
+    JsonSubTypes.Type(value = Event.OrgEvent::class, name = "org_dept_remove"),
+    JsonSubTypes.Type(value = Event.OrgEvent::class, name = "org_change"),
+    JsonSubTypes.Type(value = Event.BPMEvent::class, name = "bpms_task_change"),
+    JsonSubTypes.Type(value = Event.BPMEvent::class, name = "bpms_instance_change")
 )
 sealed class Event(val type: String) {
 
@@ -35,10 +33,14 @@ sealed class Event(val type: String) {
         @JsonProperty("EventType", required = true)
         val eventType: String,
         @JsonFormat(shape = JsonFormat.Shape.NUMBER)
-        val TimeStamp: ZonedDateTime,
-        val UserId: List<String>?,
-        val DeptId: List<String>?,
-        val CorpID: String?
+        @JsonProperty("TimeStamp", required = true)
+        val timeStamp: ZonedDateTime,
+        @JsonProperty("UserId")
+        val userIds: List<String>?,
+        @JsonProperty("DeptId")
+        val departmentIds: List<String>?,
+        @JsonProperty("CorpID")
+        val corpID: String?
     ) : Event(eventType)
 
     data class BPMEvent(
@@ -47,10 +49,13 @@ sealed class Event(val type: String) {
         val processInstanceId: String,
         val corpId: String,
         @JsonFormat(shape = JsonFormat.Shape.NUMBER)
-        val createTime: ZonedDateTime,
+        @JsonProperty("createTime", required = true)
+        val createdTime: ZonedDateTime,
+        @JsonProperty("finishTime")
         @JsonFormat(shape = JsonFormat.Shape.NUMBER)
-        val finishTime: ZonedDateTime?,
-        val bizCategoryId: String,
+        val finishedTime: ZonedDateTime?,
+        @JsonProperty("bizCategoryId", required = true)
+        val categoryId: String,
         val title: String,
         @JsonProperty("type", required = true)
         val bpmType: String,

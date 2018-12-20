@@ -18,6 +18,9 @@ const val CORPID_NAME = "DD_CORPID"
 
 const val RESPONSE_MSG = "success"
 
+const val NONCE_LENGTH = 12
+const val STATUS_CODE = 200
+
 class Callback : PojoRequestHandler<APIRequest, APIResponse>, FunctionInitializer {
 
     lateinit var objectMapper: ObjectMapper
@@ -67,11 +70,11 @@ class Callback : PojoRequestHandler<APIRequest, APIResponse>, FunctionInitialize
         }
 
         val response = dingTalkEncryptor.getEncryptedMap(RESPONSE_MSG, System.currentTimeMillis(),
-            Utils.getRandomStr(12))
+            Utils.getRandomStr(NONCE_LENGTH))
 
         logger.debug("Callback response is $response.")
 
         return APIResponse(Base64.encodeBase64String(objectMapper.writeValueAsString(response).toByteArray()),
-            mapOf("content-eventType" to "application/json"), true, 200)
+            mapOf("content-eventType" to "application/json"), true, STATUS_CODE)
     }
 }

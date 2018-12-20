@@ -4,14 +4,14 @@ import org.gradle.util.GFileUtils
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 
-val detektVersion = "1.0.0-RC11"
+val detektVersion = "1.0.0-RC12"
 val kotlinTestVersion = "3.1.11"
 val junit5Version = "5.3.2"
 val jacksonVersion = "2.9.7"
 
 plugins {
-    val kotlinVersion = "1.3.10"
-    val detektVersion = "1.0.0-RC11"
+    val kotlinVersion = "1.3.11"
+    val detektVersion = "1.0.0-RC12"
 
     id("org.jetbrains.kotlin.jvm") version kotlinVersion
     id("io.gitlab.arturbosch.detekt") version detektVersion
@@ -64,14 +64,16 @@ dependencies {
 
     implementation("com.fasterxml.jackson.core:jackson-databind:${jacksonVersion}")
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:${jacksonVersion}")
-    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:${jacksonVersion}")
+    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:${jacksonVersion}"){
+        exclude("org.jetbrains.kotlin")
+    }
 
     implementation("commons-codec:commons-codec:1.11")
     compile(files("lib/lippi-oapi-encrpt.jar"))
 
     testImplementation("org.junit.jupiter:junit-jupiter-api:${junit5Version}")
     testRuntime("org.junit.jupiter:junit-jupiter-engine:${junit5Version}")
-    testCompile("io.kotlintest:kotlintest-runner-junit5:${kotlinTestVersion}") {
+    testCompile("io.kotlintest:kotlintest-runner-junit5:${kotlinTestVersion}"){
         exclude("org.jetbrains.kotlin")
     }
 

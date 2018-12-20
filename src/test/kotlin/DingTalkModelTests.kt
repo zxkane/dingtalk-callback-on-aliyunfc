@@ -44,7 +44,7 @@ class DingTalkModelTests : StringSpec() {
                         event.shouldBeTypeOf<Event.OrgEvent>()
                         val orgEvent = event as Event.OrgEvent
                         orgEvent.eventType shouldContain "org"
-                        orgEvent.TimeStamp shouldNotBe null
+                        orgEvent.timeStamp shouldNotBe null
             }
         }
 
