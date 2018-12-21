@@ -1,15 +1,17 @@
 package com.github.zxkane.aliyun.fc
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.JsonProperty
 
-data class APIRequestKt(
+@JsonIgnoreProperties(ignoreUnknown = true)
+data class APIRequest(
     @JsonProperty("path", required = true) val path: String,
     @JsonProperty("httpMethod", required = true) val httpMethod: String,
-    @JsonProperty("headers", required = true) val headers: Map<String, Any>,
-    @JsonProperty("queryParameters", required = true) val queryParameters: Map<String, Any>,
-    @JsonProperty("pathParameters", required = true) val pathParameters: Map<String, Any>,
+    @JsonProperty("headers", required = true) val headers: Map<String, String>,
+    @JsonProperty("queryParameters", required = true) val queryParameters: Map<String, String>,
+    @JsonProperty("pathParameters", required = true) val pathParameters: Map<String, String>,
     @JsonProperty("body", required = true) val body: String,
-    @JsonProperty("isBase64Encoded", required = true) val isBase64Encoded: Boolean
+    @JsonProperty("isBase64Encoded", required = true) val isIsBase64Encoded: Boolean
 )
 
 data class APIResponse(

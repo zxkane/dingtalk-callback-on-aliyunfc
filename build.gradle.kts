@@ -76,6 +76,8 @@ dependencies {
     testCompile("io.kotlintest:kotlintest-runner-junit5:${kotlinTestVersion}"){
         exclude("org.jetbrains.kotlin")
     }
+    testCompile("org.mockito:mockito-core:2.23.+")
+    testImplementation("com.nhaarman.mockitokotlin2:mockito-kotlin:2.0.0")
 
     detektPlugins("io.gitlab.arturbosch.detekt:detekt-formatting:${detektVersion}")
 }

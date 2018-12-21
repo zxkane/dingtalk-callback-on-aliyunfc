@@ -2,26 +2,33 @@ package com.github.zxkane.dingtalk
 
 import com.aliyun.fc.runtime.Context
 import com.aliyun.fc.runtime.FunctionInitializer
-import com.aliyun.fc.runtime.PojoRequestHandler
+import com.aliyun.fc.runtime.StreamRequestHandler
 import com.dingtalk.oapi.lib.aes.DingTalkEncryptor
 import com.dingtalk.oapi.lib.aes.Utils
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
+import com.fasterxml.jackson.module.kotlin.readValue
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import com.github.zxkane.aliyun.fc.APIRequest
 import com.github.zxkane.aliyun.fc.APIResponse
+import java.io.InputStream
+import java.io.OutputStream
 import org.apache.commons.codec.binary.Base64
 
 const val TOKEN_NAME = "DD_TOKEN"
 const val AES_KEY_NAME = "DD_AES_KEY"
 const val CORPID_NAME = "DD_CORPID"
 
+const val QUERY_PARAMETER_SIGNATURE = "signature"
+const val QUERY_PARAMETER_TIMESTAMP = "timestamp"
+const val QUERY_PARAMETER_NONCE = "nonce"
+
 const val RESPONSE_MSG = "success"
 
 const val NONCE_LENGTH = 12
 const val STATUS_CODE = 200
 
-class Callback : PojoRequestHandler<APIRequest, APIResponse>, FunctionInitializer {
+class Callback : /* PojoRequestHandler<APIRequest, APIResponse>, */ StreamRequestHandler, FunctionInitializer {
 
     lateinit var objectMapper: ObjectMapper
     lateinit var dingTalkEncryptor: DingTalkEncryptor
@@ -33,20 +40,22 @@ class Callback : PojoRequestHandler<APIRequest, APIResponse>, FunctionInitialize
             System.getenv(CORPID_NAME))
     }
 
-    override fun handleRequest(request: APIRequest, context: Context): APIResponse {
+    fun handleRequest(request: APIRequest, context: Context): APIResponse {
         val logger = context.logger
         logger.debug("Callback request is $request")
 
         val encryptedEvent = objectMapper.readValue<EncryptedEvent>(
-            if (request.isBase64Encoded) String(Base64.decodeBase64(request.body)) else request.body,
+            if (request.isIsBase64Encoded) String(Base64.decodeBase64(request.body)) else request.body,
             EncryptedEvent::class.java
         )
 
         logger.debug("Encrypted callback event is $encryptedEvent.")
 
-        val eventJson = dingTalkEncryptor.getDecryptMsg(request.queryParameters.get("signature"),
-                request.queryParameters.get("timestamp"), request.queryParameters.get("nonce"),
-                encryptedEvent.encrypt)
+        val eventJson = dingTalkEncryptor.getDecryptMsg(
+            request.queryParameters.get(QUERY_PARAMETER_SIGNATURE),
+            request.queryParameters.get(QUERY_PARAMETER_TIMESTAMP),
+            request.queryParameters.get(QUERY_PARAMETER_NONCE),
+            encryptedEvent.encrypt)
 
         logger.debug("Event json is $eventJson.")
 
@@ -76,5 +85,13 @@ class Callback : PojoRequestHandler<APIRequest, APIResponse>, FunctionInitialize
 
         return APIResponse(Base64.encodeBase64String(objectMapper.writeValueAsString(response).toByteArray()),
             mapOf("content-eventType" to "application/json"), true, STATUS_CODE)
+    }
+
+    override fun handleRequest(input: InputStream, output: OutputStream, context: Context) {
+        val request = objectMapper.readValue<APIRequest>(input)
+
+        val response = handleRequest(request, context)
+
+        objectMapper.writeValue(output, response)
     }
 }
