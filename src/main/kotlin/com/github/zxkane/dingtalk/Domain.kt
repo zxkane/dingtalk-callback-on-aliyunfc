@@ -1,9 +1,6 @@
 package com.github.zxkane.dingtalk
 
-import com.fasterxml.jackson.annotation.JsonFormat
-import com.fasterxml.jackson.annotation.JsonProperty
-import com.fasterxml.jackson.annotation.JsonSubTypes
-import com.fasterxml.jackson.annotation.JsonTypeInfo
+import com.fasterxml.jackson.annotation.*
 import java.time.ZonedDateTime
 
 data class EncryptedEvent(
@@ -29,6 +26,7 @@ sealed class Event(val type: String) {
 
     data class CheckEvent(@JsonProperty("EventType", required = true) val eventType: String) : Event(eventType)
 
+    @JsonIgnoreProperties(ignoreUnknown = true)
     data class OrgEvent(
         @JsonProperty("EventType", required = true)
         val eventType: String,
@@ -39,13 +37,18 @@ sealed class Event(val type: String) {
         val userIds: List<String>?,
         @JsonProperty("DeptId")
         val departmentIds: List<String>?,
-        @JsonProperty("CorpID")
-        val corpID: String?
+        @JsonProperty("CorpId")
+        val corpId: String?
     ) : Event(eventType)
 
+    @JsonIgnoreProperties(ignoreUnknown = true)
     data class BPMEvent(
         @JsonProperty("EventType", required = true)
         val eventType: String,
+        @JsonProperty("taskId", required = false)
+        val taskId: Long,
+        @JsonProperty("processCode", required = false)
+        val processCode: String?,
         val processInstanceId: String,
         val corpId: String,
         @JsonFormat(shape = JsonFormat.Shape.NUMBER)

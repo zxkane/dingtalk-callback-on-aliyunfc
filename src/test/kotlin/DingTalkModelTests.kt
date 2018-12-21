@@ -17,7 +17,6 @@ class DingTalkModelTests : StringSpec() {
 
     init {
         val objectMapper = ObjectMapper().registerModule(JavaTimeModule()).registerKotlinModule()
-        objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
 
         "can deserialize check url event" {
             val eventJson = "{\n" +
@@ -116,6 +115,20 @@ class DingTalkModelTests : StringSpec() {
                         "bizCategoryId": "bizCategoryId",
                         "staffId": "08058646137"
                       }
+                """.trimIndent()),
+                row("""
+                    {
+                      "taskId": 48665689823,
+                      "createTime": 1545354519000,
+                      "staffId": "0917483931793546",
+                      "bizCategoryId": "",
+                      "EventType": "bpms_task_change",
+                      "type": "start",
+                      "title": "请假申请",
+                      "processCode": "PROC-A6258EA3-B094-461D-8A40-F0822587065A",
+                      "processInstanceId": "f15dcec3-105a-405b-9812-eeb99b827d01",
+                      "corpId": "ding3690d27bb4ed8c8735c2f4657eb6378f"
+                    }
                 """.trimIndent())
             ) {
                 eventJson ->
