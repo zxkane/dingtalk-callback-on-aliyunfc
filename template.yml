@@ -38,9 +38,11 @@ Resources:
               - apiParameterName: 'nonce'
                 location: 'Query'
                 parameterType: 'String'
+                required: 'REQUIRED'
               - apiParameterName: 'signature'
                 location: 'Query'
                 parameterType: 'String'
+                required: 'REQUIRED'
             x-aliyun-apigateway-fc:
               arn: acs:fc:::services/${dingtalk-callback.Arn}/functions/${callback.Arn}/
               timeout: 11000
