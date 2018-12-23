@@ -38,7 +38,7 @@ const val DTS_KEY_SECRET = "DTS_KEY_SECRET"
 const val DTS_INSTANCE_NAME = "DTS_INSTANCE_NAME"
 
 const val BPM_TABLE_NAME = "bpm_raw"
-const val BPM_TABLE_PRIMARY_KEY_NAME = "processCode"
+const val BPM_TABLE_PRIMARY_KEY_NAME = "processInstanceId"
 
 const val ORG_TABLE_NAME = "org_raw"
 const val ORG_TABLE_PRIMARY_KEY_NAME = "eventType"

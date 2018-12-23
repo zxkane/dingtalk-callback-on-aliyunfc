@@ -63,7 +63,7 @@ class CallbackTests : AbstractTest() {
             ) { event ->
                 val putRowChange = callback.serializeEvent(event, BPM_TABLE_NAME, BPM_TABLE_PRIMARY_KEY_NAME,
                     context.logger)
-                putRowChange.has("processInstanceId") shouldBe true
+                putRowChange.has("processCode") shouldBe true
                 putRowChange.has("taskId") shouldBe true
                 putRowChange.primaryKey.contains(BPM_TABLE_PRIMARY_KEY_NAME) shouldBe true
             }
