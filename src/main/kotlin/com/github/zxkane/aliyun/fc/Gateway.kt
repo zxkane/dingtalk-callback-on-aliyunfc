@@ -11,8 +11,13 @@ data class APIRequest(
     @JsonProperty("queryParameters", required = true) val queryParameters: Map<String, String>,
     @JsonProperty("pathParameters", required = true) val pathParameters: Map<String, String>,
     @JsonProperty("body", required = true) val body: String,
-    @JsonProperty("isBase64Encoded", required = true) val isIsBase64Encoded: Boolean
-)
+    @JsonProperty("isBase64Encoded", required = true) var isIsBase64Encoded: Boolean
+) {
+    /**
+     * for making the aliyun's serverless JAVA runtime happy
+     */
+    constructor() : this("", "", mapOf(), mapOf(), mapOf(), "", false)
+}
 
 data class APIResponse(
     val body: String,

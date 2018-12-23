@@ -2,17 +2,14 @@ package com.github.zxkane.dingtalk
 
 import com.aliyun.fc.runtime.Context
 import com.aliyun.fc.runtime.FunctionInitializer
-import com.aliyun.fc.runtime.StreamRequestHandler
+import com.aliyun.fc.runtime.PojoRequestHandler
 import com.dingtalk.oapi.lib.aes.DingTalkEncryptor
 import com.dingtalk.oapi.lib.aes.Utils
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import com.fasterxml.jackson.module.kotlin.readValue
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import com.github.zxkane.aliyun.fc.APIRequest
 import com.github.zxkane.aliyun.fc.APIResponse
-import java.io.InputStream
-import java.io.OutputStream
 import org.apache.commons.codec.binary.Base64
 
 const val TOKEN_NAME = "DD_TOKEN"
@@ -28,7 +25,7 @@ const val RESPONSE_MSG = "success"
 const val NONCE_LENGTH = 12
 const val STATUS_CODE = 200
 
-class Callback : /* PojoRequestHandler<APIRequest, APIResponse>, */ StreamRequestHandler, FunctionInitializer {
+class Callback : PojoRequestHandler<APIRequest, APIResponse>, FunctionInitializer {
 
     lateinit var objectMapper: ObjectMapper
     lateinit var dingTalkEncryptor: DingTalkEncryptor
@@ -40,7 +37,7 @@ class Callback : /* PojoRequestHandler<APIRequest, APIResponse>, */ StreamReques
             System.getenv(CORPID_NAME))
     }
 
-    fun handleRequest(request: APIRequest, context: Context): APIResponse {
+    override fun handleRequest(request: APIRequest, context: Context): APIResponse {
         val logger = context.logger
         logger.debug("Callback request is $request")
 
@@ -85,13 +82,5 @@ class Callback : /* PojoRequestHandler<APIRequest, APIResponse>, */ StreamReques
 
         return APIResponse(Base64.encodeBase64String(objectMapper.writeValueAsString(response).toByteArray()),
             mapOf("content-eventType" to "application/json"), true, STATUS_CODE)
-    }
-
-    override fun handleRequest(input: InputStream, output: OutputStream, context: Context) {
-        val request = objectMapper.readValue<APIRequest>(input)
-
-        val response = handleRequest(request, context)
-
-        objectMapper.writeValue(output, response)
     }
 }
