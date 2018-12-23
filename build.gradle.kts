@@ -71,6 +71,8 @@ dependencies {
     implementation("commons-codec:commons-codec:1.11")
     compile(files("lib/lippi-oapi-encrpt.jar"))
 
+    implementation("com.aliyun.openservices:tablestore:4.8.0")
+
     testImplementation("org.junit.jupiter:junit-jupiter-api:${junit5Version}")
     testRuntime("org.junit.jupiter:junit-jupiter-engine:${junit5Version}")
     testCompile("io.kotlintest:kotlintest-runner-junit5:${kotlinTestVersion}"){

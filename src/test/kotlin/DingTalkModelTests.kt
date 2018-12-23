@@ -141,7 +141,10 @@ class DingTalkModelTests : AbstractTest() {
 
         "deserialize encrypted event" {
             forall(
-                    row("{\"encrypt\":\"kKqdrHvhsH2xFw8qFJpuSo3DH8+7/hZIOEJZLsE9dfIHBy+HzF54lnuMP3B5r9GbCPXA/r2rCDnwpyusGMYpKxafcMdzwwySOWqkGzbJ6yOjVnfWHq5zCqBrEVL8eZV9\"}")
+                row("""
+                    {"encrypt":
+                        "kKqdrHvhsH2xFw8qFJpuSo3DH8+7/hZIOEJZLsE9dfIHBy+HzF54lnuMP3B5r9GbCPXA/r2rCDnwpyusGMYpKxafcMdzwwySOWqkGzbJ6yOjVnfWHq5zCqBrEVL8eZV9"}
+                """.trimIndent())
             ) {
                 json ->
                 val event = objectMapper.readValue<EncryptedEvent>(json, EncryptedEvent::class.java)

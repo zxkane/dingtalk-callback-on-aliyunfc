@@ -1,6 +1,14 @@
 package com.github.zxkane.dingtalk
 
+import com.alicloud.openservices.tablestore.SyncClient
+import com.alicloud.openservices.tablestore.model.Column
+import com.alicloud.openservices.tablestore.model.ColumnValue
+import com.alicloud.openservices.tablestore.model.PrimaryKeyBuilder
+import com.alicloud.openservices.tablestore.model.PrimaryKeyValue
+import com.alicloud.openservices.tablestore.model.PutRowRequest
+import com.alicloud.openservices.tablestore.model.RowPutChange
 import com.aliyun.fc.runtime.Context
+import com.aliyun.fc.runtime.FunctionComputeLogger
 import com.aliyun.fc.runtime.FunctionInitializer
 import com.aliyun.fc.runtime.PojoRequestHandler
 import com.dingtalk.oapi.lib.aes.DingTalkEncryptor
@@ -11,6 +19,9 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import com.github.zxkane.aliyun.fc.APIRequest
 import com.github.zxkane.aliyun.fc.APIResponse
+import java.time.ZonedDateTime
+import kotlin.reflect.full.declaredMemberProperties
+import kotlin.reflect.jvm.javaType
 import org.apache.commons.codec.binary.Base64
 
 const val TOKEN_NAME = "DD_TOKEN"
@@ -21,6 +32,17 @@ const val QUERY_PARAMETER_SIGNATURE = "signature"
 const val QUERY_PARAMETER_TIMESTAMP = "timestamp"
 const val QUERY_PARAMETER_NONCE = "nonce"
 
+const val DTS_ENDPOINT = "DTS_ENDPOINT"
+const val DTS_ACCESS_KEY = "DTS_ACCESS_KEY"
+const val DTS_KEY_SECRET = "DTS_KEY_SECRET"
+const val DTS_INSTANCE_NAME = "DTS_INSTANCE_NAME"
+
+const val BPM_TABLE_NAME = "bpm_raw"
+const val BPM_TABLE_PRIMARY_KEY_NAME = "processCode"
+
+const val ORG_TABLE_NAME = "org_raw"
+const val ORG_TABLE_PRIMARY_KEY_NAME = "eventType"
+
 const val RESPONSE_MSG = "success"
 
 const val NONCE_LENGTH = 12
@@ -30,6 +52,7 @@ class Callback : PojoRequestHandler<APIRequest, APIResponse>, FunctionInitialize
 
     lateinit var objectMapper: ObjectMapper
     lateinit var dingTalkEncryptor: DingTalkEncryptor
+    lateinit var syncClient: SyncClient
 
     override fun initialize(context: Context?) {
         objectMapper = ObjectMapper().registerModules(JavaTimeModule()).registerKotlinModule()
@@ -37,6 +60,8 @@ class Callback : PojoRequestHandler<APIRequest, APIResponse>, FunctionInitialize
         dingTalkEncryptor = DingTalkEncryptor(System.getenv(TOKEN_NAME),
             System.getenv(AES_KEY_NAME),
             System.getenv(CORPID_NAME))
+        syncClient = SyncClient(System.getenv(DTS_ENDPOINT), System.getenv(DTS_ACCESS_KEY),
+            System.getenv(DTS_KEY_SECRET), System.getenv(DTS_INSTANCE_NAME))
     }
 
     override fun handleRequest(request: APIRequest, context: Context): APIResponse {
@@ -66,6 +91,7 @@ class Callback : PojoRequestHandler<APIRequest, APIResponse>, FunctionInitialize
             }
             "bpms_instance_change", "bpms_task_change" -> {
                 logger.debug("BPM $event is received.")
+                serializeEvent(event, context.logger)
             }
             "user_add_org", "user_modify_org", "user_leave_org", "org_admin_add",
                 "org_admin_remove", "org_dept_create", "org_dept_modify", "org_dept_remove",
@@ -84,5 +110,65 @@ class Callback : PojoRequestHandler<APIRequest, APIResponse>, FunctionInitialize
 
         return APIResponse(Base64.encodeBase64String(objectMapper.writeValueAsString(response).toByteArray()),
             mapOf("content-eventType" to "application/json"), true, STATUS_CODE)
+    }
+
+    @Suppress("DEPRECATION")
+    fun serializeEvent(
+        event: Event,
+        tableName: String,
+        primaryKeyName: String,
+        logger: FunctionComputeLogger
+    ): RowPutChange {
+        var rowPutChange: RowPutChange? = null
+        val columns: MutableList<Column> = mutableListOf()
+
+        event.javaClass.kotlin.declaredMemberProperties.forEach { prop ->
+            if (prop.name == primaryKeyName) {
+                val primaryKeyBuilder = PrimaryKeyBuilder.createPrimaryKeyBuilder()
+                primaryKeyBuilder.addPrimaryKeyColumn(primaryKeyName,
+                    PrimaryKeyValue.fromString(prop.get(event) as String))
+                val primaryKey = primaryKeyBuilder.build()
+
+                rowPutChange = RowPutChange(tableName, primaryKey)
+            } else {
+                when (prop.returnType.javaType.typeName) {
+                    String::class.java.typeName -> {
+                        val value = prop.get(event) as String?
+                        columns.add(Column(prop.name, ColumnValue.fromString(value ?: "null")))
+                    }
+                    "java.util.List<java.lang.String>" -> {
+                        val value = prop.get(event) as List<*>?
+                        val strValue = value?.joinToString()
+                        columns.add(Column(prop.name, ColumnValue.fromString(strValue ?: "null")))
+                    }
+                    Long::class.java.typeName -> {
+                        columns.add(Column(prop.name, ColumnValue.fromLong(prop.get(event) as Long)))
+                    }
+                    ZonedDateTime::class.java.typeName -> {
+                        val value = prop.get(event) as ZonedDateTime?
+                        columns.add(Column(prop.name, ColumnValue.fromString(
+                            value?.toLocalDateTime().toString())))
+                    }
+                    else ->
+                        logger.warn("Unrecognized prop '${prop.name}' with type ${prop.returnType}.")
+                }
+            }
+        }
+
+        columns.forEach { column -> rowPutChange!!.addColumn(column) }
+        return rowPutChange!!
+    }
+
+    private fun serializeEvent(event: Event, logger: FunctionComputeLogger) {
+        var rowPutChange: RowPutChange? = null
+        when (event::class) {
+            Event.BPMEvent::class -> {
+                rowPutChange = serializeEvent(event, BPM_TABLE_NAME, BPM_TABLE_PRIMARY_KEY_NAME, logger)
+            }
+            Event.OrgEvent::class -> {
+                rowPutChange = serializeEvent(event, ORG_TABLE_NAME, ORG_TABLE_PRIMARY_KEY_NAME, logger)
+            }
+        }
+        syncClient.putRow(PutRowRequest(rowPutChange!!))
     }
 }

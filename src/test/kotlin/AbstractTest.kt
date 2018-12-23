@@ -1,13 +1,20 @@
+
+import com.alicloud.openservices.tablestore.SyncClient
 import com.aliyun.fc.runtime.Context
 import com.aliyun.fc.runtime.FunctionComputeLogger
 import com.dingtalk.oapi.lib.aes.Utils
 import com.github.zxkane.dingtalk.AES_KEY_NAME
 import com.github.zxkane.dingtalk.CORPID_NAME
+import com.github.zxkane.dingtalk.DTS_ACCESS_KEY
+import com.github.zxkane.dingtalk.DTS_ENDPOINT
+import com.github.zxkane.dingtalk.DTS_INSTANCE_NAME
+import com.github.zxkane.dingtalk.DTS_KEY_SECRET
 import com.github.zxkane.dingtalk.TOKEN_NAME
 import com.nhaarman.mockitokotlin2.whenever
 import io.kotlintest.specs.StringSpec
-import java.util.Collections
 import org.mockito.Mockito
+import org.mockito.Mockito.mock
+import java.util.Collections
 
 
 @Suppress("UNCHECKED_CAST")
@@ -50,8 +57,12 @@ abstract class AbstractTest : StringSpec() {
     val timestamp = System.currentTimeMillis()
 
     fun init() {
-        setEnv(mapOf(TOKEN_NAME to token, AES_KEY_NAME to aesKey, CORPID_NAME to "mycorp"))
-        whenever(context.logger).thenReturn(Mockito.mock(FunctionComputeLogger::class.java))
+        setEnv(mapOf(TOKEN_NAME to token, AES_KEY_NAME to aesKey, CORPID_NAME to "mycorp",
+            DTS_ENDPOINT to "https://dingtalk.cn-beijing.ots.aliyuncs.com",
+            DTS_ACCESS_KEY to "mykey", DTS_KEY_SECRET to "mysecret",
+            DTS_INSTANCE_NAME to "myinstance"))
+        whenever(context.logger).thenReturn(mock(FunctionComputeLogger::class.java))
         callback.initialize(context)
+        callback.syncClient = mock(SyncClient::class.java)
     }
 }
