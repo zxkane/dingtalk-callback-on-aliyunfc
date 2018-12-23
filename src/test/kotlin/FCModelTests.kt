@@ -1,5 +1,4 @@
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.github.zxkane.aliyun.fc.APIRequest
 import com.github.zxkane.aliyun.fc.APIResponse
@@ -8,14 +7,14 @@ import io.kotlintest.data.forall
 import io.kotlintest.matchers.string.shouldContain
 import io.kotlintest.shouldBe
 import io.kotlintest.shouldNotBe
-import io.kotlintest.specs.StringSpec
 import io.kotlintest.tables.row
 import java.io.ByteArrayInputStream
 
-class FCModelTests : StringSpec() {
+class FCModelTests : AbstractTest() {
 
     init {
-        val objectMapper = ObjectMapper()
+        super.init()
+        val objectMapper = callback.objectMapper
 
         "can deserialize API Request" {
             forall(

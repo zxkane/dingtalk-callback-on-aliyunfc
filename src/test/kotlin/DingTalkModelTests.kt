@@ -1,8 +1,4 @@
 
-import com.fasterxml.jackson.databind.DeserializationFeature
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import com.github.zxkane.dingtalk.EncryptedEvent
 import com.github.zxkane.dingtalk.Event
 import io.kotlintest.data.forall
@@ -10,13 +6,15 @@ import io.kotlintest.matchers.string.shouldContain
 import io.kotlintest.matchers.types.shouldBeTypeOf
 import io.kotlintest.shouldBe
 import io.kotlintest.shouldNotBe
-import io.kotlintest.specs.StringSpec
 import io.kotlintest.tables.row
+import java.time.ZonedDateTime
 
-class DingTalkModelTests : StringSpec() {
+
+class DingTalkModelTests : AbstractTest() {
 
     init {
-        val objectMapper = ObjectMapper().registerModule(JavaTimeModule()).registerKotlinModule()
+        super.init()
+        val objectMapper = callback.objectMapper
 
         "can deserialize check url event" {
             val eventJson = "{\n" +
@@ -150,5 +148,21 @@ class DingTalkModelTests : StringSpec() {
                 event.encrypt shouldNotBe null
             }
         }
+
+        "deserialize timestamp of org event" {
+            val eventJson = """
+                {
+                    "TimeStamp":"1545536053900",
+                    "CorpId":"ding3690d27bb4ed8c8735c2f4657eb6378f",
+                    "UserId":["194404002440050688"],
+                    "EventType":"user_modify_org"
+                }
+            """.trimIndent()
+
+            val orgEvent = objectMapper.readValue<Event>(eventJson, Event::class.java)
+            orgEvent.shouldBeTypeOf<Event.OrgEvent>()
+            (orgEvent as Event.OrgEvent).timeStamp.isEqual(ZonedDateTime.parse("2018-12-23T03:34:13.900+00:00"))
+        }
     }
+
 }

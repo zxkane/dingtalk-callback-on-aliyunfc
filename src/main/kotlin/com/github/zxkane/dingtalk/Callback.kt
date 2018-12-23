@@ -5,6 +5,7 @@ import com.aliyun.fc.runtime.FunctionInitializer
 import com.aliyun.fc.runtime.PojoRequestHandler
 import com.dingtalk.oapi.lib.aes.DingTalkEncryptor
 import com.dingtalk.oapi.lib.aes.Utils
+import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
@@ -32,6 +33,7 @@ class Callback : PojoRequestHandler<APIRequest, APIResponse>, FunctionInitialize
 
     override fun initialize(context: Context?) {
         objectMapper = ObjectMapper().registerModules(JavaTimeModule()).registerKotlinModule()
+        objectMapper.disable(DeserializationFeature.READ_DATE_TIMESTAMPS_AS_NANOSECONDS)
         dingTalkEncryptor = DingTalkEncryptor(System.getenv(TOKEN_NAME),
             System.getenv(AES_KEY_NAME),
             System.getenv(CORPID_NAME))
