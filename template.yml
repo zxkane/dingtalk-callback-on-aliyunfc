@@ -15,8 +15,9 @@ Resources:
         Handler: com.github.zxkane.dingtalk.Callback::handleRequest
         Runtime: java8
         Description: 'Dingtalk callbacks'
-        MemorySize: 128
-        Timeout: 10
+        MemorySize: 196
+        InitializationTimeout: 15
+        Timeout: 30
         CodeUri: './build/libs/dingtalk-callback-all-1.0.0-SNAPSHOT-all.jar'
   dingtalk_callback_gateway: # Api Group
     Type: 'Aliyun::Serverless::Api'
@@ -45,4 +46,4 @@ Resources:
                 required: 'REQUIRED'
             x-aliyun-apigateway-fc:
               arn: acs:fc:::services/${dingtalk-callback.Arn}/functions/${callback.Arn}/
-              timeout: 11000
+              timeout: 45000
