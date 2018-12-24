@@ -19,6 +19,14 @@ Resources:
         InitializationTimeout: 15
         Timeout: 30
         CodeUri: './build/libs/dingtalk-callback-all-1.0.0-SNAPSHOT-all.jar'
+        EnvironmentVariables:
+          DD_TOKEN: {{ $DD_TOKEN }}
+          DD_AES_KEY: {{ $DD_AES_KEY }}
+          DD_CORPID: {{ $DD_CORPID }}
+          DTS_ENDPOINT: {{ $DTS_ENDPOINT }}
+          DTS_INSTANCE_NAME: {{ $DTS_INSTANCE_NAME }}
+          DTS_ACCESS_KEY: {{ $DTS_ACCESS_KEY }}
+          DTS_KEY_SECRET: {{ $DTS_KEY_SECRET }}
   dingtalk_callback_gateway: # Api Group
     Type: 'Aliyun::Serverless::Api'
     Properties:

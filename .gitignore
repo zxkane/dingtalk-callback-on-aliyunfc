@@ -11,4 +11,5 @@ src/main/resources/rebel.xml
 rebel.xml
 .idea/
 .setting/
+template.yml
 LOG_PATH_IS_UNDEFINED

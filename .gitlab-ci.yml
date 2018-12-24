@@ -30,3 +30,15 @@ build:
     paths:
       - build
       - .gradle
+
+aliyun-fc-deploy:
+  stage: deploy
+  image: registry.cn-beijing.aliyuncs.com/zxkane/aliyun-fc-fun:2.7.2
+  script:
+    - >
+      sigil -f template.tmpl DD_TOKEN=$DD_TOKEN DD_AES_KEY=$DD_AES_KEY DD_CORPID=$DD_CORPID
+      DTS_ENDPOINT=$DTS_ENDPOINT DTS_INSTANCE_NAME=$DTS_INSTANCE_NAME DTS_ACCESS_KEY=$DTS_ACCESS_KEY
+      DTS_KEY_SECRET=$DTS_KEY_SECRET > template.yml
+    - fun deploy
+  only:
+    - release
