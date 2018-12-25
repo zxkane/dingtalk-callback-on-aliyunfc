@@ -5,9 +5,19 @@ Resources:
     Type: 'Aliyun::Serverless::Service'
     Properties:
       Description: 'The callback of DingTalk'
+      InternetAccess: true
+      {{ if $USING_VPC }}
+      VpcConfig:
+        VpcId: {{ $VPC_ID }}
+        {{ $switches := split "," $VPC_SWITCH_IDS }}
+        VSwitchIds: [ {{ range $index, $switch := $switches }} {{ if gt $index 0 }} , {{ end }} '{{ $switch }}' {{ end }} ]
+        SecurityGroupId: {{ $SECURITY_GROUP_ID }}
+      {{ end }}
+      {{ if $USING_LOG }}
       LogConfig:
-        Project: dingtalk-callback
-        Logstore: fc-log
+        Project: {{ $LOG_PROJECT }}
+        Logstore: {{ $LOG_STORE }}
+      {{ end }}
     callback: # function name
       Type: 'Aliyun::Serverless::Function'
       Properties:
@@ -55,3 +65,14 @@ Resources:
             x-aliyun-apigateway-fc:
               arn: acs:fc:::services/${dingtalk-callback.Arn}/functions/${callback.Arn}/
               timeout: 45000
+  dingtalk:
+    Type: 'Aliyun::Serverless::TableStore'
+    Properties:
+      ClusterType: HYBRID
+      Description: dingtalk events
+    bpm_raw:
+      Type: 'Aliyun::Serverless::TableStore::Table'
+      Properties:
+          PrimaryKeyList:
+            - Name: processInstanceId
+              Type: STRING
