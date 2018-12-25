@@ -64,7 +64,7 @@ Resources:
                 required: 'REQUIRED'
             x-aliyun-apigateway-fc:
               arn: acs:fc:::services/${dingtalk-callback.Arn}/functions/${callback.Arn}/
-              timeout: 45000
+              timeout: 30000
   dingtalk:
     Type: 'Aliyun::Serverless::TableStore'
     Properties:
