@@ -6,6 +6,9 @@ Resources:
     Properties:
       Description: 'The callback of DingTalk'
       InternetAccess: true
+      Policies:
+        - AliyunOTSReadOnlyAccess
+        - AliyunOTSWriteOnlyAccess
       {{ if $USING_VPC }}
       VpcConfig:
         VpcId: {{ $VPC_ID }}
@@ -35,8 +38,6 @@ Resources:
           DD_CORPID: {{ $DD_CORPID }}
           DTS_ENDPOINT: {{ $DTS_ENDPOINT }}
           DTS_INSTANCE_NAME: {{ $DTS_INSTANCE_NAME }}
-          DTS_ACCESS_KEY: {{ $DTS_ACCESS_KEY }}
-          DTS_KEY_SECRET: {{ $DTS_KEY_SECRET }}
   dingtalk_callback_gateway: # Api Group
     Type: 'Aliyun::Serverless::Api'
     Properties:
@@ -65,7 +66,7 @@ Resources:
             x-aliyun-apigateway-fc:
               arn: acs:fc:::services/${dingtalk-callback.Arn}/functions/${callback.Arn}/
               timeout: 30000
-  dingtalk:
+  {{ $DTS_INSTANCE_NAME }}:
     Type: 'Aliyun::Serverless::TableStore'
     Properties:
       ClusterType: HYBRID
@@ -73,6 +74,6 @@ Resources:
     bpm_raw:
       Type: 'Aliyun::Serverless::TableStore::Table'
       Properties:
-          PrimaryKeyList:
-            - Name: processInstanceId
-              Type: STRING
+        PrimaryKeyList:
+          - Name: processInstanceId
+            Type: STRING

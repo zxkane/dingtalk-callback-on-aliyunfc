@@ -33,8 +33,6 @@ const val QUERY_PARAMETER_TIMESTAMP = "timestamp"
 const val QUERY_PARAMETER_NONCE = "nonce"
 
 const val DTS_ENDPOINT = "DTS_ENDPOINT"
-const val DTS_ACCESS_KEY = "DTS_ACCESS_KEY"
-const val DTS_KEY_SECRET = "DTS_KEY_SECRET"
 const val DTS_INSTANCE_NAME = "DTS_INSTANCE_NAME"
 
 const val BPM_TABLE_NAME = "bpm_raw"
@@ -54,14 +52,15 @@ class Callback : PojoRequestHandler<APIRequest, APIResponse>, FunctionInitialize
     lateinit var dingTalkEncryptor: DingTalkEncryptor
     lateinit var syncClient: SyncClient
 
-    override fun initialize(context: Context?) {
+    override fun initialize(context: Context) {
         objectMapper = ObjectMapper().registerModules(JavaTimeModule()).registerKotlinModule()
         objectMapper.disable(DeserializationFeature.READ_DATE_TIMESTAMPS_AS_NANOSECONDS)
         dingTalkEncryptor = DingTalkEncryptor(System.getenv(TOKEN_NAME),
             System.getenv(AES_KEY_NAME),
             System.getenv(CORPID_NAME))
-        syncClient = SyncClient(System.getenv(DTS_ENDPOINT), System.getenv(DTS_ACCESS_KEY),
-            System.getenv(DTS_KEY_SECRET), System.getenv(DTS_INSTANCE_NAME))
+        syncClient = SyncClient(System.getenv(DTS_ENDPOINT), context.executionCredentials.accessKeyId,
+            context.executionCredentials.accessKeySecret, System.getenv(DTS_INSTANCE_NAME),
+            context.executionCredentials.securityToken)
     }
 
     override fun handleRequest(request: APIRequest, context: Context): APIResponse {
